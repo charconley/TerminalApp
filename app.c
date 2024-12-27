@@ -16,7 +16,7 @@ CHANGELOG,
 12/27/24
 Added funcitonality for mkdir command
 Added functionality for "touch" commmand
-Added qouting for creating files and folders with spaces - see func FindBetweenQoute and
+Added qouting for creating files and folders with spaces - see func FindBetweenQoute
 */
 
 #define LSH_RL_BUFSIZE 1024
