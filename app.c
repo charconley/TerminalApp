@@ -7,7 +7,7 @@
 #include <fcntl.h>
 
 /*
-Implementation of a unix-based terminal app in c, based on Stephen Brennen's article, https://brennan.io/2015/01/16/write-a-shell-in-c/
+Implementation of a unix-based terminal command line app in c, based on Stephen Brennen's article, https://brennan.io/2015/01/16/write-a-shell-in-c/
 
 Charlie Conley, 12/27/24
 
