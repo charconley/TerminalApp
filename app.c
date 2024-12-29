@@ -7,7 +7,12 @@
 #include <fcntl.h>
 
 /*
-Implementation of a unix-based terminal command line app in c, based on Stephen Brennen's article, https://brennan.io/2015/01/16/write-a-shell-in-c/
+Implementation of a unix-based terminal app in c, based on Stephen Brennen's article, https://brennan.io/2015/01/16/write-a-shell-in-c/
+As of now, no options for any command have been implemented.
+
+GOALS
+-Create a simple shell for file creation
+-Create a vi clone to run in the simple shell
 
 Charlie Conley, 12/27/24
 
@@ -16,7 +21,10 @@ CHANGELOG,
 12/27/24
 Added funcitonality for mkdir command
 Added functionality for "touch" commmand
-Added qouting for creating files and folders with spaces - see func FindBetweenQoute
+Added qouting for creating files and folders with spaces - see func FindBetweenQoute and
+
+12/29/24
+Added functionality for "grep", "rmdir", "pwd" commands
 */
 
 #define LSH_RL_BUFSIZE 1024
@@ -125,8 +133,14 @@ char **lsh_split_line(char *line)
     tokens[position] = NULL;
     if (grabQuote != NULL)
     {
-        // replace args[1] with the qouted name
-        tokens[1] = grabQuote;
+        if (tokens[0][0] == 'g')
+        {
+            tokens[2] = grabQuote;
+        }
+        else
+        {
+            tokens[1] = grabQuote;
+        }
     }
     return tokens;
 }
@@ -162,6 +176,9 @@ int lsh_launch(char **args)
 int lsh_cd(char **args);
 int lsh_mkdir(char **args);
 int lsh_touch(char **args);
+int lsh_grep(char **args);
+int lsh_rmdir(char **args);
+int lsh_pwd();
 int lsh_help(char **args);
 int lsh_exit(char **args);
 
@@ -169,6 +186,9 @@ char *builtin_str[] = {
     "cd",
     "mkdir",
     "touch",
+    "grep",
+    "rmdir",
+    "pwd",
     "help",
     "exit"};
 
@@ -176,6 +196,9 @@ int (*builtin_func[])(char **) = {
     &lsh_cd,
     &lsh_mkdir,
     &lsh_touch,
+    &lsh_grep,
+    &lsh_rmdir,
+    &lsh_pwd,
     &lsh_help,
     &lsh_exit};
 
@@ -192,7 +215,7 @@ int lsh_cd(char **args)
     }
     else
     {
-        if (chdir(args[1]) == -0)
+        if (chdir(args[1]) == -1)
         {
             perror("lsh");
         }
@@ -232,6 +255,60 @@ int lsh_touch(char **args)
         }
         close(fd);
     }
+    return 1;
+}
+
+int lsh_grep(char **args)
+{
+    if (args[1] == NULL || args[2] == NULL)
+    {
+        fprintf(stderr, "lsh: expected argument to \"grep\"\n");
+    }
+    else
+    {
+        FILE *fp;
+        char line[1024];
+        fp = fopen(args[2], "r");
+        if (fp == NULL)
+        {
+            perror("Error opening file");
+            return EXIT_FAILURE;
+        }
+
+        while (fgets(line, sizeof(line), fp) != NULL)
+        {
+            if (strstr(line, args[1]) != NULL)
+            {
+                printf("%s", line);
+            }
+        }
+
+        fclose(fp);
+    }
+    return 1;
+}
+
+int lsh_rmdir(char **args)
+{
+    if (args[1] == NULL)
+    {
+        fprintf(stderr, "lsh: expected argument to \"rmdir\"\n");
+    }
+    else
+    {
+        if (rmdir(args[1]) == -1)
+        {
+            perror("lsh");
+        }
+    }
+    return 1;
+}
+
+int lsh_pwd()
+{
+    char pwd[1024];
+    getcwd(pwd, sizeof(pwd));
+    printf("%s\n", pwd);
     return 1;
 }
 
